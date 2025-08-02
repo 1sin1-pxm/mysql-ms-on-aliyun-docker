@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  mysql-master:
+    image: mysql:8.0
+    container_name: mysql-master
+    environment:
+      MYSQL_ROOT_PASSWORD: Root@123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./master.cnf:/etc/mysql/conf.d/master.cnf
+      - ./master-data:/var/lib/mysql
+    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW
+    networks:
+      - mysql-net
+
+  mysql-slave:
+    image: mysql:8.0
+    container_name: mysql-slave
+    environment:
+      MYSQL_ROOT_PASSWORD: Root@123
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./slave.cnf:/etc/mysql/conf.d/slave.cnf
+      - ./slave-data:/var/lib/mysql
+    command: --server-id=2 --relay-log=mysql-relay-bin --read-only=1
+    networks:
+      - mysql-net
+
+# 新增自定义网络
+networks:
+  mysql-net:
+    driver: bridge
